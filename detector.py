@@ -111,7 +111,10 @@ if __name__ == "__main__":
         overlaps = compute_overlaps(parked_car_boxes, cars)
 
         for parking_area, overlap_areas in zip(parked_car_boxes, overlaps):
-            max_IoU_overlap = np.max(overlap_areas)
+            if overlap_areas.size > 0:
+                max_IoU_overlap = np.max(overlap_areas)
+            else:
+                max_IoU_overlap = 0  # overlap_areasが空の場合のデフォルト値
             if max_IoU_overlap < 0.15:
                 cv2.fillPoly(overlay, [np.array(parking_area)], (71, 27, 92))
                 free_space = True

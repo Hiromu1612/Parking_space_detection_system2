@@ -2091,18 +2091,10 @@ class MaskRCNN():
         return checkpoint
 
     def load_weights(self, filepath, by_name=False, exclude=None):
-        """Modified version of the corresponding Keras function with
-        the addition of multi-GPU support and the ability to exclude
-        some layers from loading.
-        exclude: list of layer names to exclude
-        """
         import h5py
-        # Conditional import to support versions of Keras before 2.2
-        # TODO: remove in about 6 months (end of 2018)
         try:
             from keras.engine import saving
         except ImportError:
-            # Keras before 2.2 used the 'topology' namespace.
             from keras.engine import topology as saving
 
         if exclude:
@@ -2114,25 +2106,22 @@ class MaskRCNN():
         if 'layer_names' not in f.attrs and 'model_weights' in f:
             f = f['model_weights']
 
-        # In multi-GPU training, we wrap the model. Get layers
-        # of the inner model because they have the weights.
         keras_model = self.keras_model
-        layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
-            else keras_model.layers
+        layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model") else keras_model.layers
 
-        # Exclude some layers
         if exclude:
             layers = filter(lambda l: l.name not in exclude, layers)
 
-        # Load weights by name if specified, otherwise load sequentially
         for layer in layers:
             if hasattr(layer, 'load_weights') and f'{layer.name}/' in f:
-                layer.load_weights(f'{layer.name}/', by_name=by_name)
+                try:
+                    layer.load_weights(f'{layer.name}/', by_name=by_name)
+                except Exception as e:
+                    print(f"Skipping loading weights for layer {layer.name} due to error: {e}")
 
         if hasattr(f, 'close'):
             f.close()
 
-        # Update the log directory
         self.set_log_dir(filepath)
 
     def get_imagenet_weights(self):
