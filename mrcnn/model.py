@@ -2120,6 +2120,18 @@ class MaskRCNN():
         layers = keras_model.inner_model.layers if hasattr(keras_model, "inner_model")\
             else keras_model.layers
 
+        # Exclude some layers
+        if exclude:
+            layers = filter(lambda l: l.name not in exclude, layers)
+
+        # Load weights by name if specified, otherwise load sequentially
+        for layer in layers:
+            if hasattr(layer, 'load_weights') and f'{layer.name}/' in f:
+                layer.load_weights(f'{layer.name}/', by_name=by_name)
+
+        if hasattr(f, 'close'):
+            f.close()
+
         # Update the log directory
         self.set_log_dir(filepath)
 
