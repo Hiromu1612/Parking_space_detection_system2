@@ -1,0 +1,20 @@
+scikit-image
+# tensorflow==1.15.2
+# keras==2.0.8
+keras
+opencv-python
+matplotlib
+numpy
+gitpython
+shapely
+#mask_rcnn
+numpy
+scipy
+Pillow
+cython
+matplotlib
+h5py
+imgaug
+IPython[all]
+#opencvのエラーを解決
+# opencv-contrib-python
